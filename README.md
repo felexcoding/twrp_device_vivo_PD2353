@@ -6,10 +6,9 @@
 # Android device tree for generic Generic Device (boot)
 
 Generated automatically using TWRP Device Tree Generator
-this tool Developed by [Melek Saidani](https://www.facebook.com/no.idea.120/)
 
 Arch: arm64
-Manufacturer: generic
-Model: Generic Device
+Manufacturer: vivo
+Model: PD2353
 
 # twrp_device_vivo_PD2353
