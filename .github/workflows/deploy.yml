@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,6 +21,7 @@ jobs:
           git config --global user.name "qcopy"
           git config --global user.email "qcopy@example.com"
           git config --global --add safe.directory "*"
+          git config --global protocol.version 2
 
       - name: Install Repo
         run: |
@@ -31,10 +33,11 @@ jobs:
       - name: Initialize TWRP Manifest
         run: |
           export PATH=~/bin:$PATH
+          export GIT_TERMINAL_PROMPT=0
           mkdir twrp
           cd twrp
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-12.1
-          repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags --optimized-fetch --retry-fetches=3 -v
 
       - name: Clone Device Tree
         run: |
