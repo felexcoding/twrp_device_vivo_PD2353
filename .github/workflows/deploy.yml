@@ -1,11 +1,11 @@
 name: Build TWRP for Vivo PD2353
 
 on:
-  workflow_dispatch: # Запуск вручную через вкладку Actions
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04 # Используем 20.04 для лучшей совместимости со старыми тулзами Android
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
