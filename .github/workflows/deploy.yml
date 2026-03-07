@@ -42,7 +42,7 @@ jobs:
           
       - name: Sync TWRP Sources
         run: |
-          export PATH=~/bin:$PATH
+          # export PATH=~/bin:$PATH
           export PYTHONUNBUFFERED=1
           export REPO_TRACE=1
           export GIT_TERMINAL_PROMPT=0
