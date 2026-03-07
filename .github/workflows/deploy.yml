@@ -33,11 +33,18 @@ jobs:
       - name: Initialize TWRP Manifest
         run: |
           export PATH=~/bin:$PATH
-          export GIT_TERMINAL_PROMPT=0
+          export PYTHONUNBUFFERED=1
           mkdir twrp
           cd twrp
-          repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-12.1
-          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags --optimized-fetch --retry-fetches=3 -v
+          repo init --depth=1 --no-repo-verify -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-12.1
+          
+      - name: Sync TWRP Sources
+        run: |
+          export PATH=~/bin:$PATH
+          export PYTHONUNBUFFERED=1
+          export REPO_TRACE=1
+          cd twrp
+          repo sync -c -j4 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune --fail-fast
 
       - name: Clone Device Tree
         run: |
