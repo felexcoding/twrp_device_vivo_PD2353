@@ -10,13 +10,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cleanup and Maximize Space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -31,35 +24,30 @@ jobs:
       - name: Install Repo
         run: |
           mkdir -p ~/bin
-          # Используем curl -L для следования редиректам, чтобы не скачать XML ошибку
-          curl -L https://storage.googleapis.com > ~/bin/repo
+          curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
           chmod a+x ~/bin/repo
-          # Проверка: если в первой строке нет 'python', значит скачалась ошибка
-          head -n 1 ~/bin/repo | grep python || (echo "Repo download failed!" && exit 1)
+          head -n 1 ~/bin/repo | grep -E 'python(3)?' >/dev/null || (echo "Repo download failed!" && exit 1)
 
       - name: Initialize TWRP Manifest
         run: |
           export PATH=~/bin:$PATH
           mkdir twrp
           cd twrp
-          # Манифест для Android 12.1 (под ядро 5.10)
-          repo init --depth=1 -u https://github.com -b twrp-12.1
+          repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-12.1
           repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
       - name: Clone Device Tree
         run: |
           cd twrp
-          # Клонируем содержимое текущего репозитория в папку устройства
-          git clone ${{ github.server_url }}/${{ github.repository }} device/vivo/PD2353
+          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }} device/vivo/PD2353
 
       - name: Build TWRP
         run: |
           export PATH=~/bin:$PATH
           cd twrp
+          export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
-          # Твой таргет из vendorsetup.sh
           lunch twrp_PD2353-eng || lunch omni_PD2353-eng
-          # Собираем образ. Для A/B это создаст boot.img
           mka recoveryimage -j$(nproc --all)
 
       - name: Upload Artifacts
