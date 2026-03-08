@@ -49,11 +49,15 @@ jobs:
           export GIT_TERMINAL_PROMPT=0
           export TERM=dumb
           cd twrp
+          # Очищаем prebuilts/rust, который часто вызывает проблемы
+          rm -rf prebuilts/rust
           python3 ~/bin/repo sync -c -j1 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune --fail-fast -v
 
       - name: Clone Device Tree
         run: |
           cd twrp
+          # Удаляем старую версию device tree, чтобы клонировать свежую
+          rm -rf device/vivo/PD2353
           git clone --depth=1 ${{ github.server_url }}/${{ github.repository }} device/vivo/PD2353
 
       - name: Build TWRP
@@ -62,7 +66,7 @@ jobs:
           cd twrp
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
-          lunch twrp_PD2353-eng || lunch omni_PD2353-eng
+          lunch twrp_PD2353-eng || lunch omni_PD2353-eng || (echo "Lunch failed!" && exit 1)
           mka recoveryimage -j$(nproc --all)
 
       - name: Upload Artifacts
