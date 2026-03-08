@@ -66,7 +66,7 @@ jobs:
           cd twrp
           export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
-          lunch omni_boot || (echo "Lunch failed!" && exit 1)
+          lunch omni_boot-eng || (echo "Lunch failed!" && exit 1)
           mka recoveryimage -j$(nproc --all)
 
       - name: Upload Artifacts
