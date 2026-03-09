@@ -27,7 +27,7 @@ TARGET_BOARD_PLATFORM := parrot
 TARGET_SCREEN_DENSITY := 480
 TW_THEME := portrait_hdpi
 
-# Kernel (из твоего unpack! НЕ Image.gz-dtb!)
+# Kernel
 BOARD_BOOT_HEADER_VERSION := 4
 BOARD_BOOTIMG_HEADER_VERSION := 4
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
