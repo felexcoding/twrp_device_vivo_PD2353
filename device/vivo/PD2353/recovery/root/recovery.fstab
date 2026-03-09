@@ -1,18 +1,16 @@
-# Android fstab file for TWRP
-# <src>  <mnt_point>  <type>  <mnt_flags>  <fs_mgr_flags>
-# mount_point   fstype    device    flags
-/system         erofs     system    display="System";logical;slotselect
-/system_ext     erofs     system_ext display="System_ext";logical;slotselect
-/product        erofs     product   display="Product";logical;slotselect
-/vendor         erofs     vendor    display="Vendor";logical;slotselect
-/vendor_dlkm    erofs     vendor_dlkm display="Vendor_DLKM";logical;slotselect
-/odm            erofs     odm       display="Odm";logical;slotselect
-/vgc            erofs     vgc       display="Vivo Customization";logical;slotselect
-
-/metadata       ext4      /dev/block/by-name/metadata
-/data           f2fs      /dev/block/by-name/userdata   fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0
-/misc           emmc      /dev/block/by-name/misc
-/boot           emmc      /dev/block/by-name/boot       slotselect
-/vendor_boot    emmc      /dev/block/by-name/vendor_boot slotselect
-/dtbo           emmc      /dev/block/by-name/dtbo       slotselect
-/vbmeta         emmc      /dev/block/by-name/vbmeta     slotselect
+# <src>           <mnt_point>         <type>   <mnt_flags and options>
+/system           erofs    /dev/block/by-name/system            logical;flags=display="System"
+/system_ext       erofs    /dev/block/by-name/system_ext        logical;flags=display="System Ext";backup=1
+/product          erofs    /dev/block/by-name/product           logical;flags=display="Product"
+/vendor           erofs    /dev/block/by-name/vendor            logical;flags=display="Vendor";backup=1
+/vendor_dlkm      erofs    /dev/block/by-name/vendor_dlkm       logical;flags=display="Vendor DLKM"
+/odm              erofs    /dev/block/by-name/odm               logical;flags=display="ODM"
+/vgc              erofs    /dev/block/by-name/vgc               logical;flags=display="VGC"
+/data             f2fs     /dev/block/by-name/userdata          length=-16384;fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0
+/boot             emmc     /dev/block/by-name/boot
+/vendor_boot      emmc     /dev/block/by-name/vendor_boot
+/dtbo             emmc     /dev/block/by-name/dtbo
+/metadata         emmc     /dev/block/by-name/metadata
+/misc             emmc     /dev/block/by-name/misc
+/vbmeta_system    emmc     /dev/block/by-name/vbmeta_system
+/vbmeta_vgc       emmc     /dev/block/by-name/vbmeta_vgc
