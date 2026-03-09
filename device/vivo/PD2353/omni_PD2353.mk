@@ -13,9 +13,4 @@ PRODUCT_BRAND := vivo
 PRODUCT_MODEL := PD2353
 PRODUCT_MANUFACTURER := vivo
 
-# КРИТИЧНО! Prebuilt файлы ТУТ
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/dtb.img:$(TARGET_COPY_OUT_RECOVERY)/dtb.img \
-    $(LOCAL_PATH)/prebuilt/kernel:$(TARGET_COPY_OUT_RECOVERY)/kernel
-
 $(call inherit-product-if-exists, vendor/twrp/config/common.mk)
