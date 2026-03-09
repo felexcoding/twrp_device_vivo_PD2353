@@ -56,7 +56,10 @@ jobs:
         run: |
           cd twrp
           rm -rf device/vivo/PD2353
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }} device/vivo/PD2353
+          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }} tmp_pd2353
+          mkdir -p device/vivo
+          mv -f tmp_pd2353/device/vivo/PD2353 device/vivo/PD2353
+          rm -rf tmp_pd2353
 
       - name: Build TWRP
         run: |
