@@ -7,20 +7,15 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
-$(call inherit-product-if-exists, vendor/twrp/config/common.mk)
-$(call inherit-product-if-exists, vendor/omni/config/common.mk)
-
-$(call inherit-product, device/vivo/PD2353/device.mk)
-
 PRODUCT_DEVICE := PD2353
 PRODUCT_NAME := omni_PD2353
 PRODUCT_BRAND := vivo
 PRODUCT_MODEL := PD2353
 PRODUCT_MANUFACTURER := vivo
 
-PRODUCT_GMS_CLIENTID_BASE := android-generic
+# КРИТИЧНО! Prebuilt файлы ТУТ
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/prebuilt/dtb.img:$(TARGET_COPY_OUT_RECOVERY)/dtb.img \
+    $(LOCAL_PATH)/prebuilt/kernel:$(TARGET_COPY_OUT_RECOVERY)/kernel
 
-PRODUCT_BUILD_PROP_OVERRIDES += \
-    PRIVATE_BUILD_DESC=""
-
-BUILD_FINGERPRINT := 
+$(call inherit-product-if-exists, vendor/twrp/config/common.mk)
