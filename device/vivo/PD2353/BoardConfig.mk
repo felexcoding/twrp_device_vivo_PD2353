@@ -28,8 +28,6 @@ TARGET_SCREEN_DENSITY := 480
 TW_THEME := portrait_hdpi
 
 # Kernel
-BOARD_BOOT_HEADER_VERSION := 4
-BOARD_BOOTIMG_HEADER_VERSION := 4
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_CMDLINE := console=ttyMSM0,115200,n8 earlycon=msm_geni_serial,0x04C00000 androidboot.hardware=qcom androidboot.memcg=1 lpm_levels.sleep_disabled=1
@@ -41,7 +39,7 @@ BOARD_INCLUDE_DTB_IN_BOOTIMG := false
 TARGET_FORCE_PREBUILT_KERNEL := true
 ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
-TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb
+TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
 endif
 
 # Partitions
