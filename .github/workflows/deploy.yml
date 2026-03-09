@@ -60,7 +60,16 @@ jobs:
           mkdir -p device/vivo
           mv -f tmp_pd2353/device/vivo/PD2353 device/vivo/PD2353
           rm -rf tmp_pd2353
-
+      - name: Debug Prebuilt Files
+        run: |
+          cd twrp
+          echo "=== PREBUILT FILES ==="
+          ls -la device/vivo/PD2353/prebuilt/
+          echo "=== FILE SIZES ==="
+          du -sh device/vivo/PD2353/prebuilt/*
+          echo "=== BoardConfig DTB ==="
+          grep -n "TARGET_PREBUILT_DTB" device/vivo/PD2353/BoardConfig.mk
+          
       - name: Build TWRP
         run: |
           export PATH=~/bin:$PATH
