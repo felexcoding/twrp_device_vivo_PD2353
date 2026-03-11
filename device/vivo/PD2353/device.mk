@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # A/B support
+AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS += \
     boot \
     system \
