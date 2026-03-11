@@ -35,7 +35,7 @@ KERNEL_MAKE_TARGET := true
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
 TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
 BOARD_KERNEL_IMAGE_NAME := kernel
-BOARD_INCLUDE_DTB_IN_BOOTIMG := false
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 TARGET_FORCE_PREBUILT_KERNEL := true
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_CMDLINE := console=ttyMSM0,115200,n8 earlycon=msm_geni_serial,0x04C00000 androidboot.hardware=qcom androidboot.memcg=1 lpm_levels.sleep_disabled=1
