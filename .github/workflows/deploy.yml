@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get update || true
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y bc build-essential zip curl libc6-dev libncurses5-dev libssl-dev x11proto-core-dev libx11-dev libgl1-mesa-dev g++-multilib tox gcc-multilib libxml2-utils xsltproc zlib1g-dev python3 python3-pip git rsync python-is-python3 schedtool lzop bison flex gperf lib32ncurses5-dev lib32z1-dev lib32stdc++6 || true
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y bc build-essential zip curl libc6-dev libncurses5-dev libssl-dev x11proto-core-dev libx11-dev libgl1-mesa-dev g++-multilib tox gcc-multilib libxml2-utils xsltproc zlib1g-dev python3 python3-pip git rsync python-is-python3 schedtool lzop bison flex gperf lib32z1-dev lib32stdc++6 || true
 
       - name: Config git
         run: |
@@ -84,7 +84,7 @@ jobs:
 
           source build/envsetup.sh
           lunch omni_PD2353-eng || (echo "Lunch failed!" && exit 1)
-          mka recoveryimage -j"$(nproc --all)"
+          mka bootimage -j"$(nproc --all)"
 
       - name: Upload artifacts
         if: always()
