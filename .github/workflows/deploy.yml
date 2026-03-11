@@ -98,6 +98,15 @@ jobs:
             ~/twrp/sources/out/target/product/PD2353/boot.img
             ~/twrp/sources/out/target/product/PD2353/*.zip
 
+      - name: Prepare Release Artifacts
+        if: success()
+        run: |
+          mkdir -p artifacts
+          cp ~/twrp/sources/out/target/product/PD2353/recovery.img artifacts/ || true
+          cp ~/twrp/sources/out/target/product/PD2353/boot.img artifacts/ || true
+          cp ~/twrp/sources/out/target/product/PD2353/*.zip artifacts/ || true
+          ls -la artifacts/
+
       - name: Create Beta Release
         uses: softprops/action-gh-release@v1
         if: success()
@@ -106,7 +115,4 @@ jobs:
           tag_name: "beta-${{ github.run_number }}"
           body: "Automatic TWRP Beta build for Vivo PD2353"
           prerelease: true
-          files: |
-            ~/twrp/sources/out/target/product/PD2353/recovery.img
-            ~/twrp/sources/out/target/product/PD2353/boot.img
-            ~/twrp/sources/out/target/product/PD2353/*.zip
+          files: artifacts/*
