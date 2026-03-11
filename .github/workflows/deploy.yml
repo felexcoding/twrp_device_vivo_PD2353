@@ -8,9 +8,17 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 180
 
+    # По умолчанию все run-шага выполняем в ~/twrp
+    defaults:
+      run:
+        shell: bash
+        working-directory: /home/runner/twrp   # поменяй на свой $HOME, если другой
+
     steps:
-      - name: Checkout device tree repo
+      - name: Checkout device-tree repo
         uses: actions/checkout@v4
+        with:
+          path: device_repo   # репо прилетит в /home/runner/twrp/device_repo
 
       - name: Install dependencies
         run: |
@@ -21,29 +29,20 @@ jobs:
             gcc-multilib libxml2-utils xsltproc zlib1g-dev python3 python3-pip \
             git rsync python-is-python3 || true
 
-      - name: Config git
-        run: |
-          git config --global user.name "qcopy"
-          git config --global user.email "qcopy@example.com"
-          git config --global --add safe.directory "*"
-          git config --global credential.helper store
-          git config --global http.postBuffer 524288000
-
       - name: Install repo tool
         run: |
           mkdir -p ~/bin
           curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
           chmod a+x ~/bin/repo
-          head -n 1 ~/bin/repo | grep -E 'python(3)?' >/dev/null || (echo "Repo download failed!" && exit 1)
 
-      - name: Init or update TWRP manifest
+      - name: Init or update TWRP sources
         run: |
           export PATH=~/bin:$PATH
           export PYTHONUNBUFFERED=1
           export GIT_TERMINAL_PROMPT=0
 
-          mkdir -p ~/twrp
-          cd ~/twrp
+          mkdir -p sources
+          cd sources
 
           if [ ! -d .repo ]; then
             echo "First run: repo init + full sync"
@@ -57,32 +56,27 @@ jobs:
             python3 ~/bin/repo sync -c -j4 --fail-fast
           fi
 
-          # Часто ломается, проще сносить
           rm -rf prebuilts/rust
 
-      - name: Clone device tree into TWRP source
+      - name: Copy device tree into sources
         run: |
-          cd ~/twrp
+          cd sources
           rm -rf device/vivo/PD2353
-          git clone --depth=1 ${{ github.server_url }}/${{ github.repository }} tmp_pd2353
           mkdir -p device/vivo
-          mv -f tmp_pd2353/device/vivo/PD2353 device/vivo/PD2353
-          rm -rf tmp_pd2353
+          cp -a ../device_repo/device/vivo/PD2353 device/vivo/PD2353
 
       - name: Debug device files
         run: |
-          cd ~/twrp
+          cd sources
           echo "=== PREBUILT ==="
           ls -la device/vivo/PD2353/prebuilt/ || echo "no prebuilt dir"
           echo "=== DTB PATH IN BoardConfig ==="
           grep TARGET_PREBUILT_DTB device/vivo/PD2353/BoardConfig.mk || echo "no TARGET_PREBUILT_DTB"
 
       - name: Build TWRP
-        shell: bash
         run: |
-          set -e
           export PATH=~/bin:$PATH
-          cd ~/twrp
+          cd sources
           export ALLOW_MISSING_DEPENDENCIES=true
 
           if [ ! -f build/envsetup.sh ]; then
@@ -100,6 +94,6 @@ jobs:
         with:
           name: TWRP-Vivo-PD2353
           path: |
-            ~/twrp/out/target/product/PD2353/recovery.img
-            ~/twrp/out/target/product/PD2353/boot.img
-            ~/twrp/out/target/product/PD2353/*.zip
+            /home/runner/twrp/sources/out/target/product/PD2353/recovery.img
+            /home/runner/twrp/sources/out/target/product/PD2353/boot.img
+            /home/runner/twrp/sources/out/target/product/PD2353/*.zip
