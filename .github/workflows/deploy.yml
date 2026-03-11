@@ -7,76 +7,99 @@ jobs:
   build:
     runs-on: self-hosted
     timeout-minutes: 180
+
     steps:
-      - name: Checkout
+      - name: Checkout device tree repo
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get update || true
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y bc build-essential zip curl libc6-dev libncurses5-dev libssl-dev x11proto-core-dev libx11-dev libgl1-mesa-dev g++-multilib tox gcc-multilib libxml2-utils xsltproc zlib1g-dev python3 python3-pip git rsync || true
-      - name: Config Git
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y \
+            bc build-essential zip curl libc6-dev libncurses5-dev libssl-dev \
+            x11proto-core-dev libx11-dev libgl1-mesa-dev g++-multilib tox \
+            gcc-multilib libxml2-utils xsltproc zlib1g-dev python3 python3-pip \
+            git rsync python-is-python3 || true
+
+      - name: Config git
         run: |
           git config --global user.name "qcopy"
           git config --global user.email "qcopy@example.com"
           git config --global --add safe.directory "*"
           git config --global credential.helper store
           git config --global http.postBuffer 524288000
-      - name: Install Repo
+
+      - name: Install repo tool
         run: |
           mkdir -p ~/bin
           curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
           chmod a+x ~/bin/repo
           head -n 1 ~/bin/repo | grep -E 'python(3)?' >/dev/null || (echo "Repo download failed!" && exit 1)
-      - name: Initialize TWRP Manifest
-        run: |
-          mkdir -p ~/bin
-          export PATH=~/bin:$PATH
-          export PYTHONUNBUFFERED=1
-          export GIT_TERMINAL_PROMPT=0
-          mkdir twrp
-          cd twrp
-          python3 ~/bin/repo init --depth=1 --no-repo-verify -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-12.1
-          
-      - name: Sync TWRP Sources
+
+      - name: Init or update TWRP manifest
         run: |
           export PATH=~/bin:$PATH
           export PYTHONUNBUFFERED=1
-          export REPO_TRACE=1
           export GIT_TERMINAL_PROMPT=0
-          export TERM=dumb
-          cd twrp
+
+          mkdir -p ~/twrp
+          cd ~/twrp
+
+          if [ ! -d .repo ]; then
+            echo "First run: repo init + full sync"
+            python3 ~/bin/repo init --depth=1 --no-repo-verify \
+              -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp \
+              -b twrp-12.1
+            python3 ~/bin/repo sync -c -j4 --force-sync --no-clone-bundle \
+              --no-tags --optimized-fetch --prune
+          else
+            echo "Existing tree: fast partial sync"
+            python3 ~/bin/repo sync -c -j4 --fail-fast
+          fi
+
+          # Часто ломается, проще сносить
           rm -rf prebuilts/rust
-          python3 ~/bin/repo sync -c -j1 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune --fail-fast -v
-      - name: Clone Device Tree
+
+      - name: Clone device tree into TWRP source
         run: |
-          cd twrp
+          cd ~/twrp
           rm -rf device/vivo/PD2353
           git clone --depth=1 ${{ github.server_url }}/${{ github.repository }} tmp_pd2353
           mkdir -p device/vivo
           mv -f tmp_pd2353/device/vivo/PD2353 device/vivo/PD2353
           rm -rf tmp_pd2353
-      - name: Debug Files
+
+      - name: Debug device files
         run: |
-          cd twrp
+          cd ~/twrp
           echo "=== PREBUILT ==="
-          ls -la device/vivo/PD2353/prebuilt/
-          echo "=== DTB PATH ==="
-          grep TARGET_PREBUILT_DTB device/vivo/PD2353/BoardConfig.mk
+          ls -la device/vivo/PD2353/prebuilt/ || echo "no prebuilt dir"
+          echo "=== DTB PATH IN BoardConfig ==="
+          grep TARGET_PREBUILT_DTB device/vivo/PD2353/BoardConfig.mk || echo "no TARGET_PREBUILT_DTB"
 
       - name: Build TWRP
+        shell: bash
         run: |
+          set -e
           export PATH=~/bin:$PATH
-          cd twrp
+          cd ~/twrp
           export ALLOW_MISSING_DEPENDENCIES=true
+
+          if [ ! -f build/envsetup.sh ]; then
+            echo "build/envsetup.sh not found – repo sync probably failed"
+            ls
+            exit 1
+          fi
+
           source build/envsetup.sh
           lunch omni_PD2353-eng || (echo "Lunch failed!" && exit 1)
-          mka recoveryimage -j$(nproc --all)
-      - name: Upload Artifacts
+          mka recoveryimage -j"$(nproc --all)"
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: TWRP-Vivo-PD2353
           path: |
-            twrp/out/target/product/PD2353/recovery.img
-            twrp/out/target/product/PD2353/boot.img
-            twrp/out/target/product/PD2353/*.zip
+            ~/twrp/out/target/product/PD2353/recovery.img
+            ~/twrp/out/target/product/PD2353/boot.img
+            ~/twrp/out/target/product/PD2353/*.zip
