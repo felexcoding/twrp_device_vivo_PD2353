@@ -5,6 +5,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: self-hosted
     timeout-minutes: 180
     steps:
@@ -92,6 +94,19 @@ jobs:
         with:
           name: TWRP-Vivo-PD2353
           path: |
+            ~/twrp/sources/out/target/product/PD2353/recovery.img
+            ~/twrp/sources/out/target/product/PD2353/boot.img
+            ~/twrp/sources/out/target/product/PD2353/*.zip
+
+      - name: Create Beta Release
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          name: "TWRP Beta Build ${{ github.run_number }}"
+          tag_name: "beta-${{ github.run_number }}"
+          body: "Automatic TWRP Beta build for Vivo PD2353"
+          prerelease: true
+          files: |
             ~/twrp/sources/out/target/product/PD2353/recovery.img
             ~/twrp/sources/out/target/product/PD2353/boot.img
             ~/twrp/sources/out/target/product/PD2353/*.zip
