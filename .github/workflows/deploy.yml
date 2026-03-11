@@ -84,7 +84,7 @@ jobs:
 
           source build/envsetup.sh
           lunch omni_PD2353-eng || (echo "Lunch failed!" && exit 1)
-          mka bootimage -j"$(nproc --all)"
+          make bootimage -j"$(nproc --all)"
 
       - name: Upload artifacts
         if: always()
