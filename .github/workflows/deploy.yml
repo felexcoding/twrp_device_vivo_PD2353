@@ -8,17 +8,16 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 180
 
-    # По умолчанию все run-шага выполняем в ~/twrp
     defaults:
       run:
         shell: bash
-        working-directory: /home/runner/twrp   # поменяй на свой $HOME, если другой
+        working-directory: /home/admin/twrp
 
     steps:
       - name: Checkout device-tree repo
         uses: actions/checkout@v4
         with:
-          path: device_repo   # репо прилетит в /home/runner/twrp/device_repo
+          path: device_repo
 
       - name: Install dependencies
         run: |
