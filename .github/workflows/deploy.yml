@@ -69,6 +69,7 @@ jobs:
           export PATH=~/bin:$PATH
           cd twrp
           export ALLOW_MISSING_DEPENDENCIES=true
+          source build/envsetup.sh
           lunch omni_PD2353-eng || (echo "Lunch failed!" && exit 1)
           mka recoveryimage -j$(nproc --all)
       - name: Upload Artifacts
