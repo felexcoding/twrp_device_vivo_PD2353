@@ -6,7 +6,7 @@
 # Inherit from those products. Most specific first.
 $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
 $(call inherit-product, device/vivo/PD2353/device.mk)
-$(call inherit-product, vendor/omni/config/common.mk)
+$(call inherit-product, vendor/twrp/config/common.mk)
 
 PRODUCT_DEVICE := PD2353
 PRODUCT_NAME := omni_PD2353
