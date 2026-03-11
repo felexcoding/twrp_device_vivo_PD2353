@@ -30,6 +30,7 @@ TARGET_SCREEN_DENSITY := 480
 TW_THEME := portrait_hdpi
 
 # Kernel
+DISABLE_TWRP_KERNEL_BUILD := true
 KERNEL_MAKE_TARGET := true
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
 TARGET_PREBUILT_DTB := $(DEVICE_PATH)/prebuilt/dtb.img
