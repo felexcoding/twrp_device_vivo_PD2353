@@ -15,7 +15,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y bc build-essential zip curl libc6-dev libncurses5-dev libssl-dev x11proto-core-dev libx11-dev libgl1-mesa-dev g++-multilib tox gcc-multilib libxml2-utils xsltproc zlib1g-dev python3 python3-pip git rsync
-
       - name: Config Git
         run: |
           git config --global user.name "qcopy"
@@ -23,14 +22,12 @@ jobs:
           git config --global --add safe.directory "*"
           git config --global credential.helper store
           git config --global http.postBuffer 524288000
-
       - name: Install Repo
         run: |
           mkdir -p ~/bin
           curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
           chmod a+x ~/bin/repo
           head -n 1 ~/bin/repo | grep -E 'python(3)?' >/dev/null || (echo "Repo download failed!" && exit 1)
-
       - name: Initialize TWRP Manifest
         run: |
           mkdir -p ~/bin
@@ -51,7 +48,6 @@ jobs:
           cd twrp
           rm -rf prebuilts/rust
           python3 ~/bin/repo sync -c -j1 --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune --fail-fast -v
-
       - name: Clone Device Tree
         run: |
           cd twrp
@@ -60,16 +56,29 @@ jobs:
           mkdir -p device/vivo
           mv -f tmp_pd2353/device/vivo/PD2353 device/vivo/PD2353
           rm -rf tmp_pd2353
-
+      - name: Debug Prebuilt Files
+        run: |
+          cd twrp
+          echo "=== PREBUILT FILES ==="
+          ls -la device/vivo/PD2353/prebuilt/
+          echo "=== FILE SIZES ==="
+          du -sh device/vivo/PD2353/prebuilt/*
+          echo "=== BoardConfig DTB ==="
+          grep -n "TARGET_PREBUILT_DTB" device/vivo/PD2353/BoardConfig.mk
+      - name: Debug Files
+        run: |
+          cd twrp
+          echo "=== PREBUILT ==="
+          ls -la device/vivo/PD2353/prebuilt/
+          echo "=== DTB PATH ==="
+          grep TARGET_PREBUILT_DTB device/vivo/PD2353/BoardConfig.mk
       - name: Build TWRP
         run: |
           export PATH=~/bin:$PATH
           cd twrp
           export ALLOW_MISSING_DEPENDENCIES=true
-          source build/envsetup.sh
           lunch omni_PD2353-eng || (echo "Lunch failed!" && exit 1)
           mka recoveryimage -j$(nproc --all)
-
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
