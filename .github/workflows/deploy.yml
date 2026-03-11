@@ -7,37 +7,37 @@ jobs:
   build:
     runs-on: self-hosted
     timeout-minutes: 180
-
-    defaults:
-      run:
-        shell: bash
-        working-directory: /home/admin/twrp
-
     steps:
-      - name: Checkout device-tree repo
+      - name: Checkout device tree repo
         uses: actions/checkout@v4
-        with:
-          path: device_repo
 
       - name: Install dependencies
         run: |
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get update || true
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S apt-get install -y bc build-essential zip curl libc6-dev libncurses5-dev libssl-dev x11proto-core-dev libx11-dev libgl1-mesa-dev g++-multilib tox gcc-multilib libxml2-utils xsltproc zlib1g-dev python3 python3-pip git rsync python-is-python3 schedtool lzop bison flex gperf lib32ncurses5-dev lib32z1-dev lib32stdc++6 || true
 
+      - name: Config git
+        run: |
+          git config --global user.name "qcopy"
+          git config --global user.email "qcopy@example.com"
+          git config --global --add safe.directory "*"
+          git config --global credential.helper store
+          git config --global http.postBuffer 524288000
+
       - name: Install repo tool
         run: |
           mkdir -p ~/bin
-          curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo
-          chmod a+x ~/bin/repo
+          curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/bin/repo || true
+          chmod a+x ~/bin/repo || true
 
       - name: Init or update TWRP sources
         run: |
           export PATH=~/bin:$PATH
           export PYTHONUNBUFFERED=1
           export GIT_TERMINAL_PROMPT=0
-
-          mkdir -p sources
-          cd sources
+          
+          mkdir -p ~/twrp/sources
+          cd ~/twrp/sources
 
           if [ ! -d .repo ]; then
             echo "First run: repo init + full sync"
@@ -48,35 +48,37 @@ jobs:
               --no-tags --optimized-fetch --prune
           else
             echo "Existing tree: fast partial sync"
-            python3 ~/bin/repo sync -c -j4 --fail-fast
+            python3 ~/bin/repo sync -c -j4 --fail-fast || true
           fi
 
-          rm -rf prebuilts/rust
+          rm -rf prebuilts/rust || true
 
       - name: Copy device tree into sources
         run: |
-          cd sources
-          rm -rf device/vivo/PD2353
-          mkdir -p device/vivo
-          cp -a ../device_repo/device/vivo/PD2353 device/vivo/PD2353
+          rm -rf ~/twrp/sources/device/vivo/PD2353
+          mkdir -p ~/twrp/sources/device/vivo
+          cp -a $GITHUB_WORKSPACE/device/vivo/PD2353 ~/twrp/sources/device/vivo/PD2353 || true
+          ls -la ~/twrp/sources/device/vivo/PD2353/ || echo "Device tree copy failed"
 
       - name: Debug device files
         run: |
-          cd sources
+          cd ~/twrp/sources
           echo "=== PREBUILT ==="
-          ls -la device/vivo/PD2353/prebuilt/ || echo "no prebuilt dir"
-          echo "=== DTB PATH IN BoardConfig ==="
-          grep TARGET_PREBUILT_DTB device/vivo/PD2353/BoardConfig.mk || echo "no TARGET_PREBUILT_DTB"
+          ls -la device/vivo/PD2353/prebuilt/ 2>/dev/null || echo "no prebuilt dir"
+          echo "=== DTB PATH ==="
+          grep TARGET_PREBUILT_DTB device/vivo/PD2353/BoardConfig.mk 2>/dev/null || echo "no TARGET_PREBUILT_DTB"
 
       - name: Build TWRP
+        shell: bash
         run: |
+          set -e
           export PATH=~/bin:$PATH
-          cd sources
+          cd ~/twrp/sources
           export ALLOW_MISSING_DEPENDENCIES=true
 
           if [ ! -f build/envsetup.sh ]; then
-            echo "build/envsetup.sh not found – repo sync probably failed"
-            ls
+            echo "ERROR: build/envsetup.sh not found"
+            ls -la
             exit 1
           fi
 
@@ -85,10 +87,11 @@ jobs:
           mka recoveryimage -j"$(nproc --all)"
 
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: TWRP-Vivo-PD2353
           path: |
-            /home/runner/twrp/sources/out/target/product/PD2353/recovery.img
-            /home/runner/twrp/sources/out/target/product/PD2353/boot.img
-            /home/runner/twrp/sources/out/target/product/PD2353/*.zip
+            ~/twrp/sources/out/target/product/PD2353/recovery.img
+            ~/twrp/sources/out/target/product/PD2353/boot.img
+            ~/twrp/sources/out/target/product/PD2353/*.zip
