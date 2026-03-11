@@ -5,4 +5,4 @@
 #
 
 # Screen density
-PRODUCT_AAPT_CONFIG := 
+PRODUCT_AAPT_CONFIG := normal
