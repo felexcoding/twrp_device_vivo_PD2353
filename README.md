@@ -1,8 +1,6 @@
 # Copyright (C) 2026 The Android Open Source Project
 # SPDX-License-Identifier: Apache-2.0
-# Android device tree for generic Generic Device (boot)
-
-Generated automatically using TWRP Device Tree Generator
+# yep
 
 Arch: arm64
 Manufacturer: vivo
